@@ -1,0 +1,49 @@
+println ("Build Script:subProject")
+//plugins {
+//    id 'groovy'
+//}
+//
+//group 'org.example'
+//version '1.0-SNAPSHOT'
+//
+//repositories {
+//    mavenCentral()
+//}
+//
+//dependencies {
+//    compile 'org.codehaus.groovy:groovy-all:2.3.11'
+//    testCompile group: 'junit', name: 'junit', version: '4.12'
+//}
+println "Build：subProject：子项目配置开始：subProject Configuration........"
+//task subProjectTask(dependsOn:rootProject.rootProjectTask) {
+//    println "Build：subProject：子项目里任务配置：subProjectTask Configuration........"
+//    doFirst {
+//        println "Build：subProject：执行根项目任务：subProjectTask is excuting doFirst......."
+//    }
+//    doLast {
+//        println "Build：subProject：执行根项目任务：subProjectTask is excuting doLast......."
+//    }
+//}
+//println "Build：subProject：子项目配置结束：subProject Configuration........"
+
+gradle.taskGraph.whenReady{taskExcutionGraph->
+    for(Task myTask in taskExcutionGraph.allTasks)
+        println "Build：subProject：task whenReady！ ${myTask.name} is about to Excute......"
+}
+
+
+gradle.afterProject { proj ->
+    println "Build：subProject： 执行afterProject......,current project name is--${proj.name}"
+}
+
+gradle.projectsEvaluated {
+    println "Build：subProject： 执行projectsEvaluated..."
+}
+
+project.beforeEvaluate { proj ->
+    println "Build：subProject：  执行project beforeEvaluate......,current project name is--${proj.name}"
+}
+
+project.afterEvaluate { proj ->
+    println "Build：subProject：  执行project afterEvaluate......,current project name is--${proj.name}"
+}

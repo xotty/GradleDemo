@@ -1,0 +1,178 @@
+import javax.inject.Inject
+
+//创建task------------------------------
+//1.标准方法
+task myTask {
+    //使用Action创建 , 添加到 Action 列表的头部
+    doFirst(new Action<Task>() {
+        @Override
+        void execute(Task task) {
+            println "doFirst(Action<? super Task> action)"
+        }
+    })
+
+    //使用Closure创建， 添加到 Action 列表的头部
+    doFirst {
+        println "doFirst(Closure action)"
+    }
+}
+//e.g.
+task myTask1_1 {
+    group "MyGroup"
+    description "$name description"
+    doLast {
+        println "Action in task1_1"
+    }
+}
+
+task myTask1_2(group:"MyGroup", description:"task description") doLast{
+    println "Action in task1_2"
+
+}
+//2.采用 Project.task(String name) 方法来创建
+project.task("myTask2").doLast {
+    println "Action in task2"
+}
+myTask2.configure{
+    group "MyGroup"
+    description "$name description"
+}
+
+//3.采用 TaskContainer.create(String name) 方法来创建
+project.tasks.create("myTask3_1").doLast {
+    println "Action in task3_1"
+}
+
+getTasks().create("myTask3_2", {
+    group "MyGroup"
+    description "$name description"
+    setDependsOn(["myTask1_1", "myTask2"])
+}).doLast{
+    println "This is myTask3_2!!!"
+}
+
+//为已有Task添加Action-----------------------
+//1.标准方法
+myTask1_1.doLast{
+    println "hello"
+}
+//2.采用 TaskContainer获取已有的task名称
+tasks.getByName("myTask1_1"){
+    doLast{
+        println "123456"
+    }
+}
+
+//自定义Task-----------------
+
+//********简单Task*********
+// 定义创建目录的普通方法
+def static createDir(fileName){
+    File f = new File(fileName)
+    f.mkdirs()
+}
+// 定义生成Java 项目目录的任务
+task createJavaProjectDir {
+    doLast {
+        def dirList = ['src/main/java', 'src/main/resources', 'src/test/java', 'src/test/resources']
+        dirList.each { fileName -> createDir(fileName) }
+    }
+}
+
+
+task copyDocs(type:Copy) {
+    from 'src'
+    into 'build/target/doc'
+    doLast{
+        println "Copy is done!"
+    }
+
+}
+
+//在Script中自定义DefaultTask的子类
+class Greetings1 extends DefaultTask {
+    String xName="Gradle"
+
+    @TaskAction
+    void myAction1(){
+        println "Hello $xName!"
+    }
+    @TaskAction
+    def myAction2(){
+        println "Hi $xName!"
+    }
+}
+
+//运行时只需提供参数即可,这种Task也叫增强型Task，它实际执行的是其Type类的内容
+task hello1(type:Greetings1){
+    xName="Mr. John"
+    //这个Action通常不需要
+    doLast{
+        println "in Greeting1 from script class"
+    }
+}
+
+//运行时只需提供参数即可,这种Task也叫增强型Task，它实际执行的是其Type类的内容
+task hello2(type:Greetings2,dependsOn:hello1){
+    xName="Mrs. Jessica"
+    doLast{
+        println "in Greeting2 from buildSrc class"
+    }
+}
+
+//关联在Jar包里实现的任务类
+task hello3(type:Greetings3,dependsOn:hello2){
+    println "hello3"
+    xName="Mr. Tommas"
+    doLast{
+        println "in Greeting3 from Jar"
+    }
+}
+//将Jar包'greetings.jar'纳入进来一起编译运行
+buildscript {
+    dependencies {
+        classpath fileTree(dir: 'libs', includes: ['greetings.jar'])
+    }
+}
+
+//Command line options
+task processUrl(type:UrlProcess)
+
+
+//Inject
+public class CustomTask extends DefaultTask {
+    final String message
+    final int number
+
+    @Inject
+    CustomTask(String message, int number) {
+        this.message = message
+        this.number = number
+    }
+
+        @TaskAction
+        def excute(){
+            println "message=$message  number=$number!"
+        }
+
+}
+task myInjectTask(type: CustomTask, constructorArgs: ['hello', 42])
+
+//task rule
+tasks.addRule("Pattern: ping<ID>") { String taskName ->
+    println taskName
+    if (taskName.startsWith("ping")) {
+        task(taskName) {
+            doLast {
+                println "Pinging: " + taskName
+            }
+        }
+    }
+}
+
+task groupPing {
+    dependsOn pingServer1, pingServer2
+}
+
+//gradle命令行中没有带任务参数时执行该任务
+defaultTasks 'myTask'

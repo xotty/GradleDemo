@@ -1,0 +1,29 @@
+gradle.beforeSettings {
+    println "Init：执行beforeSettings..."
+}
+println "Init script......"
+
+gradle.settingsEvaluated {
+    println "Init：执行settingsEvaluated..."
+}
+gradle.buildFinished {
+    println "Init：构建结束..."
+}
+gradle.projectsLoaded {
+    println "Init：执行projectsLoaded..."
+}
+
+gradle.beforeProject { proj ->
+    println "Init：执行beforeProject......,current project name is--${proj.name}"
+}
+gradle.afterProject { proj ->
+    println "Init： 执行afterProject......,current project name is--${proj.name}"
+}
+gradle.taskGraph.whenReady{taskExcutionGraph->
+for(Task myTask in taskExcutionGraph.getAllTasks())
+    println "Init：task whenReady！ ${myTask.name} is about to Excute......"
+}
+
+gradle.projectsEvaluated {
+    println "Init: 执行projectsEvaluated..."
+}

@@ -1,0 +1,199 @@
+class Server {
+    String name
+    String url
+
+    NamedDomainObjectContainer<Node> nodesContainner
+    /**
+     * Inside the DSL this method is invoked. We use
+     * the configure method of the NamedDomainObjectContainer to
+     * automatically create Node instances.
+     * <pre>
+     * server {*     url = 'http://server1'
+     *     nodes { // This is the nodes() method we define here.
+     *         port = 9000
+     *          }
+     *      }
+     * </pre>
+     */
+    def nodes(final Closure configureClosure) {
+        nodesContainner.configure(configureClosure)
+    }
+
+    Server(String name) {
+        this.name = name
+    }
+
+}
+
+class Node {
+    String name
+    Integer port
+
+    Node(String name) {
+        this.name = name
+    }
+}
+
+//定义Gradle DSL及其方法中需要使用的常量
+ext {
+    MY_EXTENSION_NAME = 'deployments'
+    DEPLOY_TASK_PATTERN = 'deployOn%sTo%s'
+    REPORTING_TASK_NAME = 'reportDeployments'
+    TASK_GROUP_NAME = 'Deployment'
+}
+//创建可以处理deployments DSL的extension
+setupExtension(project)
+
+//为每个Node节点创建一个deploy task
+createDeploymentTasks(project)
+
+//创建打印deployments内容的Task
+createReportTask(project)
+
+/**
+ * Create extension on the project for handling the deployments
+ * definition DSL with servers and nodes. This allows the following DSL
+ * in our build script:
+ * <pre>
+ * deployments {
+ *      server1 {
+ *          url = 'http://server'
+ *          nodes {
+ *                 node1 {
+ *                         port = 9000
+ *                      }
+ *                }
+ *           }
+ *      }
+ * </pre>
+ */
+private void setupExtension(final Project project) {
+
+    // Create NamedDomainObjectContainer for Server objects.
+    // We must use the container() method of the Project class
+    // to create an instance. New Server instances are
+    // automatically created, because we have String argument
+    // constructor that will get the name we use in the DSL.
+    final NamedDomainObjectContainer<Server> servers = project.container(Server)
+
+    servers.all {
+        // Here we have access to the project object, so we
+        // can use the container() method to create a
+        // NamedDomainObjectContainer for Node objects.
+        nodesContainner = project.container(Node)
+    }
+
+    // Use deployments as name in the build script to define
+    // servers and nodes.
+    project.extensions.add(MY_EXTENSION_NAME, servers)
+}
+
+/**
+ * Create a new deployment task for each node.
+ */
+private void createDeploymentTasks(final Project project) {
+    def servers = project.extensions.getByName(MY_EXTENSION_NAME)
+    servers.all {
+        // Actual Server instance is the delegate
+        // of this closure. We assign it to a variable
+        // so we can use it again inside the
+        // closure for nodes.all() method.
+        //Server 实例
+        def serverInfo = delegate
+
+        nodesContainner.all {
+            // Assign this closure's delegate to
+            // variable so we can use it in the task
+            // configuration closure.
+            //Node 实例
+            def nodeInfo = delegate
+
+            // Make node and server names pretty
+            // for use in task name.
+            def taskName =
+                    String.format(
+                            DEPLOY_TASK_PATTERN,
+                            name.capitalize(),
+                            serverInfo.name.capitalize())
+
+            // Create new task for this node.
+            project.task(taskName, type: DeploymentTask) {
+                description = "Deploy to '${nodeInfo.name}' on '${serverInfo.name}'"
+                group = TASK_GROUP_NAME
+                server = serverInfo
+                node = nodeInfo
+            }
+        }
+    }
+}
+
+/**
+ * Add reporting task to project.
+ */
+private void createReportTask(final Project project) {
+    project.task(REPORTING_TASK_NAME, type: DeploymentReportTask) {
+        description = 'Show configuration of servers and nodes'
+        group = TASK_GROUP_NAME
+    }
+}
+
+class DeploymentTask extends DefaultTask {
+    Server server
+    Node node
+    /**
+     * Simple implementation to show we can
+     * access the Server and Node instances created
+     * from the DSL.
+     */
+    @TaskAction
+    void deploy() {
+        println "Deploying to ${server.url}:${node.port}"
+    }
+}
+
+class DeploymentReportTask extends DefaultTask {
+    /**
+     * Simple task to show we can access the
+     * Server and Node instances also via the
+     * project extension.
+     */
+    @TaskAction
+    void report() {
+        def servers = project.extensions.getByName('deployments')
+
+        servers.all {
+            println "Server '${name}' with url '${url}':"
+
+            nodesContainner.all {
+                println "\tNode '${name}' using port ${port}"
+            }
+        }
+    }
+
+}
+
+deployments {
+    Beijing {
+        url = 'http://beijing.address'
+        nodes {
+            node1 {
+                port = 9000
+            }
+            node2 {
+                port = 80
+            }
+        }
+    }
+
+    Shanghai {
+        url = 'http://shanghai.address'
+        nodes {
+            unitTest {
+                port = 10001
+            }
+            integrationTest {
+                port = 10002
+            }
+        }
+    }
+}

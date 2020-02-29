@@ -1,0 +1,77 @@
+def username="John"
+ext.age=20
+
+task showPersonInfo1(group:"demo"){
+    def isMale=true
+    ext.city="Shanghai"
+    doLast{
+        def job="worker"
+        ext.company="CCTV"
+        println "Task Action1:     name=$username     age=$age"
+        println "Task Action1:     isMale=$isMale  city=$city"
+        println "Task Action1:     Job=$job  company=$company"
+    }
+    doLast{
+        println "Task Action2:     name=$username     age=$age"
+        println "Task Action2:     isMale=$isMale  city=$city"
+        println "Task Action2:     company=$company"
+        //wrong: println "Job=$job "
+    }
+}
+
+task showPersonInfo2(group:"demo"){
+    doLast{
+        println "Another Task:     username=$username     age=$age"
+        println "Another Task:     city=$showPersonInfo1.city"
+        //wrong:println "isMale=$isMale  city=$city"
+        //wrong:println "Job=$job  company=$company"
+    }
+}
+
+//定义在gradle.properties中的属性
+task showStudentInfo(group:"demo"){
+    doLast{
+        println "studentName=${studentName}    studentScore=$project.studentScore"
+    }
+}
+println "name=$username     age=$age"
+
+class Greetings extends DefaultTask {
+    @TaskAction
+    void myAction1(){
+        //wrong println $project.username
+        println "Class:     age=$project.age"
+        println "Class:     studentName=${project.studentName}    studentScore=$project.studentScore"
+        println "Class:     $project.configurations.song"
+    }
+    @TaskAction
+    def myAction2(){
+        println "Class:     age = ${project.age}!"
+        println "Class:     city = ${project.showPersonInfo1.city}"
+        //wrong:println "Hi ${project.showPersonInfo1.company}"
+    }
+}
+
+def add(int x,int y){
+    //println "name=$username"    局部变量在方法中不可见
+    println "Gradle Method:     age=$age"
+    x+y
+}
+
+def closure = {
+    //局部变量在闭包中可见
+    println "Closure:     name=$username     age=$age"
+}
+
+task mTask(type:Greetings,group:"demo"){
+    doLast {
+        closure.call()
+        println "Enhanced Task:     ${add(3, 5)}"
+        println "Enhanced Task:     $configurations.song"
+    }
+}
+
+configurations{
+    ext.song="Gong wWth Wind"
+    println "Script Block:     name=$username     age=$age"
+}

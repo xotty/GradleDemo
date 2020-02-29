@@ -1,0 +1,3 @@
+//apply from:'lifecycle_settings.gradle'
+rootProject.name="MyRootProject"
+include 'subProject','anotherSubProject'

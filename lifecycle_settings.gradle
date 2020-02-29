@@ -1,0 +1,42 @@
+rootProject.name = 'rootProject'
+println "Settings Script......"
+include 'subProject'
+
+//这里的beforeSettings不会执行
+gradle.beforeSettings {
+    println "Settings：执行beforeSettings..."
+}
+
+gradle.settingsEvaluated {
+    println "Settings：执行settingsEvaluated..."
+}
+
+gradle.projectsLoaded {
+    println "Settings：执行projectsLoaded..."
+}
+
+gradle.projectsEvaluated {
+    println "Settings: 执行projectsEvaluated..."
+}
+
+gradle.beforeProject { proj ->
+    println "Settings： 执行beforeProject......,current project name is--${proj.name}"
+}
+
+gradle.afterProject { proj ->
+    println "Settings： 执行afterProject......,current project name is--${proj.name}"
+}
+
+gradle.buildStarted {
+    println "Settings：构建开始..."
+}
+
+gradle.buildFinished {
+    println "Settings：构建结束..."
+}
+
+TaskExecutionGraph taskGraph = gradle.getTaskGraph()
+taskGraph.whenReady {taskExcutionGraph->
+    for(Task myTask in taskExcutionGraph.getAllTasks())
+        println "Settings：task whenReady！ ${myTask.name} is about to Excute......"
+}

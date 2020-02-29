@@ -1,0 +1,89 @@
+class MyExtensionClass {
+    //此方法在子类直接使用时必须有，否则属性赋值时只能用"="
+    void name(String name) {
+        this.name = name
+    }
+    //此方法在子类直接使用时必须有，否则属性赋值时只能用"="
+    void age(int age) {
+        this.age = age
+    }
+
+    String name
+    int age
+    //构造器可选
+    MyExtensionClass(String name) {
+        this.name = name
+    }
+}
+
+class SubExtensionClass extends MyExtensionClass  {
+    boolean isDriver
+    //此方法必须有，否则属性赋值时只能用"="
+    void isDriver(boolean isDriver) {
+        this.isDriver = isDriver
+    }
+
+    //构造器可选
+    SubExtensionClass(boolean isDriver) {
+        super("")
+        this.isDriver = isDriver
+    }
+}
+
+// 方法1.create​(String name, Class<T> type, Object... constructionArguments)
+MyExtensionClass myClass1=project.extensions.create('myExtension1', MyExtensionClass, "John")
+//                                                      («name»,         «type»,      «constructor args», …)
+
+//方法2.create​(Class<T> publicType, String name, Class<? extends T> instanceType, Object... constructionArguments)
+MyExtensionClass myClass2=extensions.create(MyExtensionClass, 'mySubExtension1',SubExtensionClass,true)
+//                                                ( «type»,         «name»,        «subclass»         «constructor args», …)
+
+//方法3.void add​(String name, T extension)
+extensions.add('myExtension2',new MyExtensionClass(""))
+extensions.add('mySubExtension2',new SubExtensionClass(true))
+
+//方法4.void add​(Class<T> publicType, String name, T extension)
+extensions.add(SubExtensionClass,'mySubExtension3',new SubExtensionClass(true))
+
+myExtension1{
+    name "Mr.Zhang"
+    age 24
+}
+
+myExtension2{
+    name="Mr.Wu"
+    age=30
+}
+
+mySubExtension1{
+    name 'Mr.Zhao'
+    age 34
+    isDriver false
+}
+
+mySubExtension2{
+    name "Mr.Li"
+    age 44
+    isDriver  true
+}
+
+mySubExtension3{
+    name="Mr.Wang"
+    age=54
+    isDriver=false
+}
+
+def ex1 = getExtensions().findByName("myExtension2")
+def ex2 = extensions.getByName("mySubExtension2")
+def ex3 = getExtensions().getByName("mySubExtension3")
+task extentionExample {
+    doLast {
+        println "方法1：name=${myClass1.name} ；age=${myClass1.age}}"
+        println "方法2：name=${myClass2.name}；age=${myClass2.age}；isDriver=${myClass2.isDriver}"
+        println "方法3.1：name=${ex1.name}；age=${ex1.age}}"
+        println "方法3.2：name=${ex2.name}；age=${ex2.age}；isDriver=${ex2.isDriver}"
+        println "方法4：name=${ex3.name}；age=${ex3.age}；isDriver=${ex3.isDriver}"
+    }
+}
+
+

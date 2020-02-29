@@ -1,0 +1,102 @@
+//领域对象类型定义
+class MyDomainObj {
+    //必须定义一个 name 属性，并且这个属性值初始化以后不要修改
+    String name
+    String msg
+
+    //构造函数必须有一个 name 参数
+    public MyDomainObj(String name) {
+        this.name = name
+    }
+
+    //必须，否则赋值要用"="
+    void msg(String msg) {
+        this.msg = msg
+    }
+
+}
+//方法1：构建单层Domain
+NamedDomainObjectContainer<MyDomainObj> myDomainContainer = project.container(MyDomainObj)
+getExtensions().add("myExtension1", myDomainContainer)
+myExtension1 {
+    myDomain1 {
+        msg "This is domain1"
+    }
+    myDomain2 {
+        msg "This is domain2"
+    }
+    myDomain3 {
+        msg "This is domain3"
+    }
+}
+def myExt1 = project.extensions.getByName('myExtension1')
+task domainExample1 {
+    doLast {
+        myExt1.all { data ->
+            println "方法1：$data.name--->$data.msg"
+        }
+        def domain = myExt1.getByName("myDomain2")
+        println "$domain.msg"
+    }
+}
+
+
+//方法2：构建双层Domain
+class MyExtensionClass {
+
+    //定义一个 NamedDomainObjectContainer 属性
+    NamedDomainObjectContainer<MyDomainObj> myDomainContainer
+
+    //必须，带project参数的构造器
+    public MyExtensionClass(Project project) {
+        //通过 project.container(...) 方法创建 NamedDomainObjectContainer
+        myDomainContainer = project.container(MyDomainObj)
+        getExtensions().add("myExtension1", myDomainContainer)
+    }
+
+    //让其支持 Gradle DSL 语法
+    void myDomainName1(Action<NamedDomainObjectContainer<MyDomainObj>> action) {
+        action.execute(myDomainContainer)
+    }
+
+    //另一种定义方法，让其支持 Gradle DSL 语法
+    def myDomainName2(final Closure configureClosure) {
+        myDomainContainer.configure(configureClosure)
+    }
+
+}
+def myExt2 = getExtensions().create("myExtension2", MyExtensionClass, project)
+myExtension2 {
+    myDomainName1 {
+        myDomain1 {
+            msg "This is domain1"
+        }
+        myDomain2 {
+            msg "This is domain2"
+        }
+        myDomain3 {
+            msg "This is domain3"
+        }
+    }
+    myDomainName2 {
+        myDomain4 {
+            msg "This is domain4"
+        }
+        myDomain5 {
+            msg "This is domain5"
+        }
+        myDomain6{
+            msg "This is domain6"
+        }
+    }
+}
+//def myExt2 = project.extensions.getByName('myExtension2')
+task domainExample2 {
+    doLast {
+        myExt2.myDomainContainer.all { data ->
+            println "方法2：$data.name--->$data.msg"
+        }
+        def domain=myExt2.myDomainContainer.getByName("myDomain2")
+        println "$domain.msg"
+    }
+}

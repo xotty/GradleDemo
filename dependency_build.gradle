@@ -1,0 +1,206 @@
+/*-------------Configuration------------------*/
+//创建方法1
+configurations.create('myConfiguration1')
+configurations.myConfiguration1.transitive = false
+//查找"myConfiguration1，不存在则创建
+configurations.maybeCreate("myConfiguration1").description("This is myConfiguration1")
+configurations.maybeCreate("myConfiguration2").description("This is myConfiguration2")
+
+//创建方法2
+configurations {
+    //adding a configuration:
+    myConfiguration3 {
+        extendsFrom myConfiguration2
+        description = "This is myConfiguration3"
+        visible = false
+    }
+    //创建方法3
+    //adding a configuration that extends existing configuration:
+    //(testImplementation was added by the java plugin)
+    myConfiguration4.extendsFrom(testImplementation)
+    myConfiguration4.description("This is myConfiguration4")
+
+    //configuring existing configurations not to put transitive dependencies on the compile classpath
+    //this way you can avoid issues with implicit dependencies to transitive libraries
+    compileClasspath.transitive = false
+    testCompileClasspath.transitive = false
+
+}
+
+//  //创建方法4.在需要时创建
+configurations.register("myConfiguration5", new Action<Configuration>() {
+    @Override
+    void execute(Configuration configuration) {
+        println "Hello  ${configuration.name}"
+    }
+}
+)
+
+configurations.all { Configuration config ->
+    if (config.name.startsWith("myConfiguration")) {
+        println "$name----->$config.description------>$config.state"
+    }
+}
+
+task listConfigurationFile(group:"demo") {
+    doLast {
+        configurations.myConfiguration5.each { File file -> println file.name }
+    }
+}
+
+//confiuration使用
+dependencies {
+    myConfiguration4 'org.slf4j:slf4j-api:1.7.26'
+    myConfiguration5  configurations.myConfiguration4
+    myConfiguration5 "commons-lang:commons-lang:2.6"
+}
+
+/*-------------Dependency------------------*/
+//External module dependencies
+dependencies {
+    //for dependencies found in artifact repositories you can use
+    //the group:name:version notation
+    myConfiguration2 'commons-lang:commons-lang:2.6'
+
+    //map-style notation:
+    implementation group: 'com.google.code.guice', name: 'guice', version: '1.0'
+
+    implementation('org.hibernate:hibernate:3.1') {
+        //in case of versions conflict '3.1' version of hibernate wins:
+        force = true
+
+        //excluding a particular transitive dependency:
+        exclude module: 'cglib' //by artifact name
+        exclude group: 'org.jmock' //by group
+        exclude group: 'org.unwanted', module: 'iAmBuggy' //by both name and group
+
+        //disabling all transitive dependencies of this dependency
+        transitive = false
+    }
+    //含classifier
+//    compile "org.gradle.test.classifiers:service:1.0:jdk15@jar"
+//    myConfiguration4 group: 'org.gradle.test.classifiers', name: 'service', version: '1.0', classifier: 'jdk14'
+}
+
+//File dependencies
+dependencies {
+    //declaring arbitrary files as dependencies
+    implementation files('hibernate.jar', 'libs/spring.jar')
+
+    //putting all jars from 'libs' onto compile classpath
+    implementation fileTree('libs')
+}
+
+//Project dependencies
+dependencies {
+    myConfiguration3 project(':anotherSubProject')
+}
+
+
+//Client module dependencies
+dependencies {
+    runtime module("org.codehaus.groovy:groovy:2.3.3") {
+        dependency("commons-cli:commons-cli:1.0") {
+            transitive = false
+        }
+        module(group: 'org.apache.ant', name: 'ant', version: '1.9.3') {
+            dependencies "org.apache.ant:ant-launcher:1.9.3@jar","org.apache.ant:ant-junit:1.9.3"
+        }
+    }
+}
+
+//显示依赖内容
+task showDependencyContents(group:"demo") {
+
+    doLast {
+        ext.conf = configurations.getByName("myConfiguration4")
+        conf.dependencies.each { dependency ->
+                println "${dependency.getName()}--->${dependency.getVersion()}--->${dependency.CLASSIFIER}"
+                conf.files(dependency).each { jarfile ->
+                    println jarfile.path
+                    ant.copy( file:jarfile, todir:"libs") }
+        }
+
+        println configurations['myConfiguration3'].buildDependencies.getDependencies().each{task->println task.name}
+    }
+}
+
+//在构建脚本中，开发人员使用模块组和名称声明依赖，但版本使用占位符，例如：“default”;这个“default”版本通过依赖解析规则被解析为
+//一个特定的版本，该规则将在一个已核准模块的公司目录中查找该版本。
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        if (details.requested.version == 'default') {
+            def version = findDefaultVersionInCatalog(details.requested.group, details.requested.name)
+            details.useVersion version
+        }
+        //强制使用特定版本
+        if (details.requested.group == 'org.gradle') {
+            details.useVersion '1.4'
+        }
+
+        //强制使用特定模块
+        if (details.requested.name == 'log4j') {
+            //prefer 'log4j-over-slf4j' over 'log4j', with fixed version:
+            details.useTarget "org.slf4j:log4j-over-slf4j:1.7.5"
+        }
+
+    }
+}
+
+def findDefaultVersionInCatalog(String group, String name) {
+    //some custom logic that resolves the default version into a specific version
+    "1.0"
+}
+
+/*-------------Repository------------------*/
+repositories{
+    mavenCentral()         //http://repo1.maven.org/maven2
+    jcenter()              //http://jcenter.bintray.com
+    google()               //https://maven.google.com
+    gradlePluginPortal()   //https://plugins.gradle.org/m2/
+    mavenLocal()           //本地的 Maven 缓存,默认位置 USER_HOME/.m2/repository
+    flatDir {              //把一个（平面）文件系统目录用作仓库
+        dirs 'libs'
+    }
+}
+//ivy仓库只能是自定义的
+repositories {
+    ivy {
+        //本地
+        url "../local-repo"
+        //远程： url "http://repo.mycompany.com/repo"
+    }
+}
+//自定义Maven仓库
+repositories {
+    maven {
+        //需要账号认证
+        credentials {
+            username 'user'
+            password 'password'
+        }
+        //指定url地址
+        url "http://repo.mycompany.com/maven2"
+        //如果上述url中找不到JAR，那么会使用下列URL来查找JAR
+        artifactUrls "http://repo.mycompany.com/jars"
+        artifactUrls "http://repo.mycompany.com/jars2"
+
+    }
+}
+
+//为具体仓库命名
+repositories {
+    flatDir {
+        name 'localRepository'
+    }
+}
+//为特定名称仓库添加相关信息
+repositories {
+    localRepository {
+        dirs 'lib'
+    }
+}
+//为特定名称仓库添加相关信息
+repositories.localRepository {
+    dirs 'lib'
+}

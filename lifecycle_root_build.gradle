@@ -1,0 +1,118 @@
+println ("Build Script:rootProject")
+//plugins {
+//    id 'groovy'
+//}
+//
+//group 'org.example'
+//version '1.0-SNAPSHOT'
+//
+//repositories {
+//    maven {
+//        url 'https://maven.aliyun.com/repository/central'
+//    }
+//}
+//
+//dependencies {
+//    compile 'org.codehaus.groovy:groovy-all:2.3.11'
+//    testCompile group: 'junit', name: 'junit', version: '4.12'
+//}
+println "Build：rootProject：根项目配置开始:rootProject Configuration........"
+task rootProjectTask {
+    println "Build：rootProject：根项目里任务配置：rootProjectTask Configuration........"
+    doFirst {
+        println "Build：rootProject：执行根项目任务：rootProjectTask  is excuting doFirst......."
+    }
+    doLast {
+        println "Build：rootProject：执行根项目任务：rootProjectTask  is excuting doLast......."
+    }
+}
+println "Build：rootProject：根项目配置结束:rootProject Configuration........"
+/**自定义一个监听器*/
+class taskWhenreadyListener implements TaskExecutionGraphListener {
+    @Override
+    void graphPopulated(TaskExecutionGraph taskGraph) {
+
+        for(Task myTask in taskGraph.allTasks)
+            println "Build：rootProject：task whenReady！ ${myTask.name} is about to Excute......,TaskExecutionGraphListener.graphPopulated"
+    }
+}
+/**添加一个task执行图的监听器*/
+gradle.taskGraph.addTaskExecutionGraphListener(new taskWhenreadyListener())
+
+class buildListener implements BuildListener {
+
+    //这里此方法无效
+    @Override
+    void beforeSettings(Settings settings) {
+        println "Build：rootProject：beforeSettings......,settings Directory is:${settings.settingsDir}"
+    }
+    //这里此方法无效
+    @Override
+    void projectsLoaded(org.gradle.api.invocation.Gradle gradle) {
+        println "Build：rootProject：projectsLoaded......,project name is:${gradle.rootProject.name}"
+    }
+
+    @Override
+    void buildFinished(BuildResult result) {
+        println "Build：rootProject：buildFinished......,build action is:${result.getAction()}"
+    }
+    //这里此方法过期失效
+    @Override
+    void buildStarted(Gradle gradle) {
+        println "Build：rootProject：buildStarted......,project name is:${gradle.rootProject.name}"
+    }
+
+    //这里此方法无效
+    @Override
+    void settingsEvaluated(Settings settings) {
+        println "Build：rootProject：settingsEvaluated......,settings Directory is:${settings.settingsDir}"
+    }
+
+    @Override
+    void projectsEvaluated(Gradle gradle) {
+        println "Build：rootProject： projectsEvaluated......,current project name is:${gradle.rootProject.name}"
+    }
+}
+gradle.addListener(new buildListener())
+
+class projectEvaluationListener implements ProjectEvaluationListener {
+    //仅对子项目有效，对当前项目无效
+    void beforeEvaluate(org.gradle.api.Project proj) {
+        println "Build：rootProject：执行beforeProject......,current project name is:${proj.name}"
+    }
+    //对当前项目和子项目均有效
+    void afterEvaluate(org.gradle.api.Project proj, org.gradle.api.ProjectState projstate) {
+        println "Build：rootProject：执行afterProject.........,current project name is--${proj.name}"
+    }
+}
+gradle.addListener(new projectEvaluationListener())
+
+class taskExecutionListener implements TaskExecutionListener {
+    void beforeExecute(org.gradle.api.Task mTask) {
+        println "Build：rootProject：TASK：beforeExecute......,task name is:${mTask.name}"
+    }
+
+    void afterExecute(org.gradle.api.Task mTask, org.gradle.api.tasks.TaskState mTaskState){
+        println "Build：rootProject：TASK：afterExecute......,task name is:${mTask.name}"
+    }
+}
+gradle.addListener(new taskExecutionListener())
+
+class taskActionListener implements TaskActionListener{
+    void beforeActions(org.gradle.api.Task mTask) {
+        println "Build：rootProject：TASK：beforeActions......,task name is:${mTask.name}"
+    }
+
+    void afterActions(org.gradle.api.Task mTask) {
+        println "Build：rootProject：TASK：afterActions......,task name is:${mTask.name}"
+    }
+}
+gradle.addListener(new taskActionListener())
+
+project.beforeEvaluate { proj ->
+    println "Build：rootProject：  执行project beforeEvaluate......,current project name is--${proj.name}"
+}
+
+project.afterEvaluate { proj ->
+    println "Build：rootProject：  执行project afterEvaluate......,current project name is--${proj.name}"
+}

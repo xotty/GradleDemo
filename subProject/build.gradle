@@ -1,0 +1,7 @@
+//定义在gradle.properties中的属性
+task showStudentInfo(group:"demo"){
+    doLast{
+        println "studentName=${studentName}    studentScore=$project.studentScore"
+        println "studentName=${rootProject.studentName}    studentScore=$project.parent.studentScore"
+    }
+}

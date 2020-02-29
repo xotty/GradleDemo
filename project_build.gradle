@@ -1,0 +1,41 @@
+
+
+def variable1=  "Groovy"
+String variable2="Java"
+ext.value1="Kotlin"
+task myTask1 {
+    int number1=10
+    ext.value2="Swift"
+    println "Variable value is :$variable1----$variable2-----$number1----$ext.value2"
+}
+
+task myTask2 {
+    println "Variable value is :$variable1----$variable2-----$value1"
+}
+
+ext {
+    springVersion = "3.1.0.RELEASE"
+    emailNotification = "build@master.org"
+}
+
+sourceSets.all { ext.purpose = null }
+
+sourceSets {
+    main {
+        purpose = "production"
+    }
+    test {
+        purpose = "test"
+    }
+    plugin {
+        purpose = "production"
+    }
+}
+
+task printProperties {
+    doLast {
+        println springVersion
+        println emailNotification
+        sourceSets.matching { it.purpose == "production" }.each { println it.name }
+    }
+}

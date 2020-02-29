@@ -1,0 +1,11 @@
+sourceSets.all {
+    println name
+    sourceSets.main.compileClasspath.each { println it.path}
+//    println "---------"
+//    sourceSets.test.compileClasspath.each { println it.name}
+}
+
+//buildTypes {
+//    devBuild{
+//    }
+//}
