@@ -15,6 +15,18 @@ class MyDomainObj {
     }
 
 }
+//方法0：构建零层Domain
+project.extensions.create("myExtension0", MyDomainObj,"Dog" )
+myExtension0{
+    name "God"
+    msg  'Here is no domain'
+}
+task domainExample0(group:'demo_domain') {
+    doLast {
+        println "方法0： $project.myExtension0.name-->${project.myExtension0.msg}"
+    }
+}
+
 //方法1：构建单层Domain
 NamedDomainObjectContainer<MyDomainObj> myDomainContainer = project.container(MyDomainObj)
 getExtensions().add("myExtension1", myDomainContainer)
@@ -30,7 +42,7 @@ myExtension1 {
     }
 }
 def myExt1 = project.extensions.getByName('myExtension1')
-task domainExample1 {
+task domainExample1(group:'demo_domain') {
     doLast {
         myExt1.all { data ->
             println "方法1：$data.name--->$data.msg"
@@ -91,7 +103,7 @@ myExtension2 {
     }
 }
 //def myExt2 = project.extensions.getByName('myExtension2')
-task domainExample2 {
+task domainExample2(group:'demo_domain') {
     doLast {
         myExt2.myDomainContainer.all { data ->
             println "方法2：$data.name--->$data.msg"
@@ -100,3 +112,26 @@ task domainExample2 {
         println "$domain.msg"
     }
 }
+
+
+
+
+//class AnotherDomainObj {
+//    String name
+//    String message
+//    String greeter
+//    public AnotherDomainObj(String name) {
+//        this.name = name
+//    }
+//}
+//project.extensions.create("myExtension0", AnotherDomainObj,"Good" )
+//myExtension0{
+////    name "cup"
+//    message  'Hi'
+//    greeter  'Gradle'
+//}
+//task domainExample0(group:'demo_domain') {
+//    doLast {
+//        println "${project.myExtension0.message} from ${project.myExtension0.greeter}====$project.myExtension0.name"
+//    }
+//}

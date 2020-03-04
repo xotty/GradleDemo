@@ -1,11 +1,70 @@
-sourceSets.all {
-    println name
-    sourceSets.main.compileClasspath.each { println it.path}
-//    println "---------"
-//    sourceSets.test.compileClasspath.each { println it.name}
+repositories {
+    mavenCentral()
 }
 
-//buildTypes {
-//    devBuild{
-//    }
-//}
+dependencies {
+    compileClasspath "commons-lang:commons-lang:2.6"
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/java'
+            println "SourceDirectorySet name is : $name"
+            println output.classesDirs
+        }
+        resources {
+            srcDir 'src/resources'
+            println "SourceDirectorySet name is : $name"
+        }
+    }
+}
+println sourceSets.main.output.classesDirs
+
+sourceSets {
+
+    custom {
+        println "sourceSet name is：$name"
+        //if you truly want to override the defaults:
+        output.resourcesDir = file('out/bin')
+        // Compiled Java classes should use this directory
+        java.outputDir = file('out/bin')
+        //修改缺省的compileClasspath
+        compileClasspath = files("libs")
+        compileClasspath.each { println "compileClasspath in sourceSets is: $it.path" }
+    }
+}
+sourceSets.custom.compileClasspath.each { println it.path }
+
+//confguation中的compileClasspath并没有改变
+project.configurations.getByName("compileClasspath").each { println "compileClasspath in configuration is: $it.name" }
+
+//显示所有sourceSet名称和路径
+sourceSets.all {
+    it.compileClasspath.each {
+        println "sourceSet name from sourceSets.all is:  $name"
+        println it.path
+    }
+}
+
+//在Task中执行copy、jar等任务
+task copyMethod  {
+    doLast {
+        copy {
+            from 'src/main/webapp'
+            into 'build/explodedWar'
+            include '**/*.html'
+            include '**/*.jsp'
+        }
+    }
+}
+
+
+//创建一个包装器任务，通过改变gradleVersion的值和重新运行该任务可以升级包装器的版本
+task myWrapper(type: Wrapper) {
+    gradleVersion = '6.0'                            //缺省为当前版本
+    distributionType = Wrapper.DistributionType.ALL  //缺省为BIN
+    distributionBase="PROJECT"                       //安装gradle的绝对目录，缺省为GRADLE_USER_HOME
+    distributionPath="wrapper/dists"                 //安装gradle的相对路径
+    //distributionUrl="下载gradle的自定义路径"，缺省为http\://services.gradle.org/distributions/gradle-${gradleVersion}-bin.zip
+}

@@ -1,0 +1,47 @@
+apply plugin: 'maven-publish'
+apply plugin: "java"
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'org.xotty.gradle-plugin'
+            artifactId 'myplugin'
+            version '1.0'
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            println  "0000000000000"
+println   System.getenv("GRADLE_HOME")
+            url uri("${System.getenv('GRADLE_USER_HOME')}")
+        }
+    }
+}
+
+
+apply plugin: 'groovy'
+apply plugin: 'maven'
+archivesBaseName = 'customplugin'
+group = 'org.xotty.gradle-plugin'
+version = '1.0'
+
+repositories {
+    maven {
+        url 'https://maven.aliyun.com/repository/jcenter'
+    }
+}
+
+dependencies {
+    compile localGroovy()
+    compile gradleApi()
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+//         repository( url: uri('../../myRepo'))
+            repository(url:"file:///users/changqing/.m2/repository/")
+        }
+
+    }
+}

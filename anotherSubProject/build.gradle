@@ -1,5 +1,4 @@
-//apply plugin:'java'
-//apply from:'../lifecycle_root_build.gradle'
+
 dependencies {
   //  compile project(':subProject')
 }

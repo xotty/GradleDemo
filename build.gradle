@@ -1,26 +1,42 @@
-//plugins {
-//    id 'groovy'
+//buildscript {
+//    repositories {
+//        mavenLocal()
+//    }
+//    dependencies {
+//        //这里配置为发布时填写的:groupId:artifactId:version
+//        classpath 'org.xotty.gradle-plugin:ownplugin:1.0'
+//    }
 //}
-////Gradle runtime dependency
-//dependencies {
-//    implementation gradleApi()
-//    implementation localGroovy()
-//}
+
+
+plugins {
+    id 'groovy'
+}
+//Gradle runtime dependency
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+}
 //apply from:'lifecycle_root_build.gradle'
 ////apply from :'extentions_build.gradle'
 ////apply from :'extentions_nested_build.gradle'
-////apply from :'domain_build.gradle'
+//apply from :'domain_build.gradle'
 ////apply from :'domain_nested_build.gradle'
 //apply from : 'task_build.gradle'
 ////apply from : 'project_build.gradle'
 //apply from : 'dependency_build.gradle'
 //apply from : 'varriable_property.gradle'
-apply plugin: 'java'
-apply from : 'misc_build.gradle'
+//apply from : 'plugin_build.gradle'
+apply from : 'publishing_build.gradle'
+//apply from : 'misc_build.gradle'
+//apply plugin:'MyPlugin1'
 allprojects {
     apply plugin: 'java'
     repositories {
         mavenCentral()
     }
+
 }
 
+
+//apply from : 'misc_build.gradle'

@@ -13,6 +13,7 @@ configurations {
         extendsFrom myConfiguration2
         description = "This is myConfiguration3"
         visible = false
+
     }
     //创建方法3
     //adding a configuration that extends existing configuration:
