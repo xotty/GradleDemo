@@ -1,13 +1,13 @@
-//buildscript {
-//    repositories {
-//        mavenLocal()
-//    }
-//    dependencies {
-//        //这里配置为发布时填写的:groupId:artifactId:version
-//        classpath 'org.xotty.gradle-plugin:ownplugin:1.0'
-//    }
-//}
-
+buildscript {
+    repositories {
+        mavenLocal()
+    }
+    dependencies {
+        //这里配置为发布时填写的:groupId:artifactId:version
+        classpath 'org.xotty.gradle-plugin:myplugin:1.0'
+//      classpath 'org.xotty.gradle-plugin:customplugin:1.0'
+    }
+}
 
 plugins {
     id 'groovy'
@@ -17,26 +17,21 @@ dependencies {
     implementation gradleApi()
     implementation localGroovy()
 }
-//apply from:'lifecycle_root_build.gradle'
-////apply from :'extentions_build.gradle'
-////apply from :'extentions_nested_build.gradle'
-//apply from :'domain_build.gradle'
-////apply from :'domain_nested_build.gradle'
-//apply from : 'task_build.gradle'
-////apply from : 'project_build.gradle'
-//apply from : 'dependency_build.gradle'
-//apply from : 'varriable_property.gradle'
-//apply from : 'plugin_build.gradle'
-apply from : 'publishing_build.gradle'
-//apply from : 'misc_build.gradle'
-//apply plugin:'MyPlugin1'
+////apply from:'lifecycle_root_build.gradle'
+//////apply from :'extentions_build.gradle'
+//////apply from :'extentions_nested_build.gradle'
+////apply from :'domain_build.gradle'
+//////apply from :'domain_nested_build.gradle'
+////apply from : 'task_build.gradle'
+//////apply from : 'project_build.gradle'
+////apply from : 'dependency_build.gradle'
+apply from: 'varriable_property.gradle'
+apply from: 'plugin_build.gradle'
+apply from: 'publishing_build.gradle'
 allprojects {
     apply plugin: 'java'
     repositories {
         mavenCentral()
     }
-
 }
-
-
 //apply from : 'misc_build.gradle'

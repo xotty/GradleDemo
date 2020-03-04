@@ -1,14 +1,4 @@
-
-//buildscript {
-//    repositories {
-//        mavenLocal()
-//    }
-//    dependencies {
-//        //这里配置为发布时填写的:groupId:artifactId:version
-//        classpath 'org.xotty.gradle-plugin:ownplugin:1.0'
-//    }
-//}
-
+//源码在build Script中的plugin
 apply plugin:MyPlugin1
 class MyPlugin1 implements Plugin<Project> {
     @Override
@@ -19,7 +9,10 @@ class MyPlugin1 implements Plugin<Project> {
     }
 }
 
+//源码在buildSrc中的plugin
+apply plugin: 'myplugin2'
 //apply plugin:plugins.MyPlugin2
 
-apply plugin: 'org.xotty.you'
-//apply plugin: 'org.xotty.me'
+//源码在src中，然后发布到mavenLocal()的plugin
+apply plugin: 'org.xotty.myplugin3'
+//apply plugin:MyPlugin3

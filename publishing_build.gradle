@@ -1,5 +1,9 @@
+//publishing---》myplugin
 apply plugin: 'maven-publish'
 apply plugin: "java"
+jar{
+    exclude('Greetings3.class')
+}
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -10,15 +14,15 @@ publishing {
         }
     }
     repositories {
-        maven {
-            println  "0000000000000"
-println   System.getenv("GRADLE_HOME")
+        mavenLocal()
+        /*可选本地仓
+         maven {
             url uri("${System.getenv('GRADLE_USER_HOME')}")
-        }
+        }*/
     }
 }
 
-
+//uploadArchives---》customplugin
 apply plugin: 'groovy'
 apply plugin: 'maven'
 archivesBaseName = 'customplugin'
@@ -39,7 +43,7 @@ dependencies {
 uploadArchives {
     repositories {
         mavenDeployer {
-//         repository( url: uri('../../myRepo'))
+            //mavenLocal()的地址 ，也可以是任意其它地址
             repository(url:"file:///users/changqing/.m2/repository/")
         }
 
