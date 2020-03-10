@@ -2,3 +2,14 @@
 dependencies {
   //  compile project(':subProject')
 }
+task showInherited(group:'demo_buildLogic')   {
+    doLast {
+        // Use inherited property
+        println 'srcDirName1: ' + srcDirName1
+//        println 'srcDirName2: ' + srcDirName2
+        // Use inherited method
+//        File srcDir = rootProject.getSrcDir(project)
+//        println 'srcDir: ' + rootProject.relativePath(srcDir)
+    }
+}
+

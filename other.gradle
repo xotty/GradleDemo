@@ -1,0 +1,6 @@
+task hello  {
+    def light="This is light"
+    doLast {
+        println "hello from the other build."
+    }
+}

@@ -1,0 +1,104 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'commons-codec', name: 'commons-codec', version: '1.14'
+    }
+}
+
+// Define an extra property
+ext.srcDirName1 = 'src/main'
+
+// Define a method
+ def getSrcDir(project) {
+    return project.file(srcDirName)
+}
+
+
+void myMethod(){
+    println 'This is public method!'
+}
+
+task task1(group:'demo_buildLogic'){
+    doLast{
+        println 'Here is task1'
+        myMethod()
+        println 'srcDir----> ' + rootProject.relativePath(getSrcDir(project))
+    }
+}
+
+task task2(group:'demo_buildLogic'){
+    doLast{
+        println 'Here is task2'
+        myMethod()
+    }
+}
+
+//将属性注入子项目
+project(':subProject') {
+    ext.srcDirName2 = "$srcDirName1/legacy"
+}
+
+//buildSrc下自定义任务
+task task3(type:Greetings2,group:'demo_buildLogic'){
+    xName="Groovy"
+    doLast{
+        println 'Here is task3'
+    }
+}
+
+//buildSrc下的自定义类
+task task4(group:'demo_buildLogic'){
+    doLast{
+        println 'Here is task4'
+        def mc=new MyClass()
+        mc.method1()
+        mc.method2()
+
+    }
+}
+
+//运行其它Gradle脚本中的任务
+task excuteTaskInOtherGradleScript(type: GradleBuild,group:'demo_buildLogic') {
+    buildFile = 'other.gradle'
+    tasks = ['hello']
+}
+
+//外部依赖库
+import org.apache.commons.codec.binary.Base64
+task encodeBase64(group:'demo_buildLogic') {
+    doLast {
+        byte[] encodedString = new Base64().encode('hello world\n'.getBytes())
+        println new String(encodedString)
+    }
+}
+
+//使用Groovy 类和对象
+class SomeGroovyClass {
+    def property1 = 'ha'
+    def field2 = 'ho'
+    def field4 = 'hu'
+
+    def getField1() {
+        return 'getHa'
+    }
+
+    def getProperty(String name) {
+        if (name != 'field3')
+            return metaClass.getProperty(this, name) //将请求转发到getter以获取除field3之外的所有属性。
+        else
+            return 'field3'
+    }
+}
+
+task pogo(group:'demo_buildLogic'){
+    doLast {
+        def someGroovyClass = new SomeGroovyClass()
+        println someGroovyClass.property1
+        println someGroovyClass.field1
+        println someGroovyClass.field2
+        println someGroovyClass.field3
+        println someGroovyClass.field4
+        }
+ }

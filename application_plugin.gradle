@@ -1,0 +1,13 @@
+apply plugin:'application'
+
+application {
+    mainClassName = 'mainGroovy'     //指定程序入口
+    applicationName = 'youApp'
+    executableDir = 'out'
+//    outputDir = file('build/sample')
+//    classpath = files("libs/MyRootProject.jar")
+
+//    executableDir = 'custom_bin_dir'                  //指定启动目录，缺省为bin
+//    applicationDefaultJvmArgs = ['-Dgreeting.language=en']
+}
+

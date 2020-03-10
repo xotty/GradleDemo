@@ -5,3 +5,20 @@ task showStudentInfo(group:"demo"){
         println "studentName=${rootProject.studentName}    studentScore=$project.parent.studentScore"
     }
 }
+
+task showInherited(group:'demo_buildLogic')   {
+    doLast {
+        // Use inherited property
+        println 'srcDirName1: ' + srcDirName1
+        println 'srcDirName2: ' + srcDirName2
+        // Use inherited method
+        File srcDir = getSrcDir(project)
+//        println 'srcDir: ' + rootProject.relativePath(srcDir)
+    }
+}
+
+//
+task excuteFromOtherGradleScript(type: GradleBuild,group:'demo_buildLogic') {
+    buildFile = "$rootDir/other.gradle"
+    tasks = ['hello']
+}

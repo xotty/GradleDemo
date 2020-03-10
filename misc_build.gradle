@@ -47,6 +47,21 @@ sourceSets.all {
     }
 }
 
+task printSourceSetInfo{
+    doLast{
+        println "=================sourceSets.main.java.srcDirs================="
+        sourceSets.main.java.srcDirs.each {println it}
+        println "=================sourceSets.main.java.outputDir================="
+        println sourceSets.main.java.outputDir
+        println "=================sourceSets.main.output.classesDirs================="
+        sourceSets.main.output.classesDirs.each {println it}
+        println "=================sourceSets.main.compileClasspath================="
+        sourceSets.main.compileClasspath.each {println it}
+        println "=================sourceSets.main.runtimeClasspath================="
+        sourceSets.main.runtimeClasspath.each {println it}
+    }
+}
+
 //在Task中执行copy、jar等任务
 task copyMethod  {
     doLast {
@@ -67,4 +82,29 @@ task myWrapper(type: Wrapper) {
     distributionBase="PROJECT"                       //安装gradle的绝对目录，缺省为GRADLE_USER_HOME
     distributionPath="wrapper/dists"                 //安装gradle的相对路径
     //distributionUrl="下载gradle的自定义路径"，缺省为http\://services.gradle.org/distributions/gradle-${gradleVersion}-bin.zip
+}
+
+
+task printSpecInfo{
+    doLast{
+        println DEFAULT_BUILD_DIR_NAME
+        println DEFAULT_BUILD_FILE
+        println GRADLE_PROPERTIES
+        sourceSets.main.java.srcDirs.each {println it}
+        println sourceSets.main.java.outputDir
+        sourceSets.main.output.classesDirs.each {println it}
+        sourceSets.main.compileClasspath.each {println it}
+        sourceSets.main.runtimeClasspath.each {println it}
+    }
+}
+
+task myConfigure {
+    doLast {
+        def pos = configure(new java.text.FieldPosition(10)) {
+            beginIndex = 1
+            endIndex = 5
+        }
+        println pos.beginIndex
+        println pos.endIndex
+    }
 }

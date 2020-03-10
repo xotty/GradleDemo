@@ -1,51 +1,68 @@
 //publishing---》myplugin
 apply plugin: 'maven-publish'
-apply plugin: "java"
-jar{
+apply plugin: "groovy"
+apply plugin: 'java-gradle-plugin'
+//apply plugin: "com.gradle.plugin-publish"
+tasks.withType(Jar){
     exclude('Greetings3.class')
 }
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId 'org.xotty.gradle-plugin'
-            artifactId 'myplugin'
-            version '1.0'
-            from components.java
-        }
-    }
-    repositories {
-        mavenLocal()
-        /*可选本地仓
-         maven {
-            url uri("${System.getenv('GRADLE_USER_HOME')}")
-        }*/
-    }
+
+def groovyFile = file("src/main/groovy/MyPlugin3.groovy")
+def myArtifact = artifacts.add('archives', groovyFile) {
+    classifier 'groovy'
+    extension 'txt'
 }
+//publishing {
+//    publications {
+//        myPublic(MavenPublication) {
+//            groupId 'org.xotty.gradle-plugin'
+//            artifactId 'myplugin'
+//            version '1.0'
+//            from components.java
+//            artifact "src/main/groovy/Greetings3.groovy"
+//            artifact myArtifact
+//        }
+//    }
+//    repositories {
+//         maven {
+////          name 'myrepo'    //仓库名称可选
+//            url uri("${System.getenv('GRADLE_USER_HOME')}")
+//        }
+//    }
+//}
 
 //uploadArchives---》customplugin
-apply plugin: 'groovy'
+apply plugin: 'java'
 apply plugin: 'maven'
 archivesBaseName = 'customplugin'
-group = 'org.xotty.gradle-plugin'
-version = '1.0'
-
-repositories {
-    maven {
-        url 'https://maven.aliyun.com/repository/jcenter'
-    }
-}
-
-dependencies {
-    compile localGroovy()
-    compile gradleApi()
-}
-
+//group = 'org.xotty.gradle-plugin'
+//version = '1.0'
 uploadArchives {
     repositories {
         mavenDeployer {
             //mavenLocal()的地址 ，也可以是任意其它地址
-            repository(url:"file:///users/changqing/.m2/repository/")
+            repository(url:"file:///Volumes/DATA/gradle_repo")
         }
 
     }
 }
+
+//plugins {
+//    id 'java-gradle-plugin'
+//    id 'maven-publish'
+//    id 'ivy-publish'
+//}
+
+//
+group 'org.xotty'
+version '1.0'
+
+gradlePlugin {
+    plugins {
+        custom {
+            id = 'org.xotty.other-myplugin3'
+            implementationClass = 'MyPlugin3'
+        }
+    }
+}
+
