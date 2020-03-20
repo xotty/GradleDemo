@@ -108,3 +108,27 @@ task myConfigure {
         println pos.endIndex
     }
 }
+
+//解析层次化数据的Groovy工具类方法ConfigSlurper
+def configFile = file("$rootDir/gradle/config/buildConfig.groovy")
+def parsedConfigEnv = new ConfigSlurper('local').parse(configFile.toURI().toURL())
+def parsedConfigGen = new ConfigSlurper().parse(configFile.toURI().toURL())
+task showConfigInfo {
+    doLast {
+        println parsedConfigEnv.tomcat.hostname
+
+        println parsedConfigGen.outer.msg
+        println parsedConfigGen.outer.inner.msg
+
+        //与Properties互相转换
+        java.util.Properties props = new Properties()
+        props = parsedConfigGen.toProperties()
+        props.each {println it}
+        def myconfig = new ConfigSlurper().parse(props)
+
+        // 将config写入文件
+        new File("$buildDir/myConfigFile").withWriter { writer ->
+            myconfig.writeTo(writer)
+        }
+    }
+}

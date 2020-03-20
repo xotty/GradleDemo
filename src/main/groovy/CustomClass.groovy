@@ -10,6 +10,23 @@ class MyClass extends ParentClass{
     }
 
     def method2(){
+        def a=1
+        a++
+        assert a==2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         println "Hello Method2"
     }
 }

@@ -38,9 +38,11 @@ task readfile(group: 'demo_file') {
 }
 
 task writefile(group: 'demo_file') {
+    version=1.0
+    ext.buildTimestamp = new Date().format('yyyy-MM-dd HH:mm:ss')
     doLast {
-        def filePath = "data.txt"
-        File myfile9 = new File(filePath)
+        def filePath = "$buildDir/myfile"
+        File myfile9 = new File(filePath+"9")
         // 写入文件
         myfile9.write("This is line1")
         myfile9 << "\nThis is line2"
@@ -48,11 +50,18 @@ task writefile(group: 'demo_file') {
        //myfile9.text = "This is line4"  //会覆盖前面的内容
         println myfile9.text
 
-        File myfile8 = new File(filePath)
+        File myfile8 = new File(filePath+"8")
         myfile8.withWriter {
             out->out.write("This is line in myfile8")
         }
         println myfile8.text
+
+        def myfile7 = new File(filePath+"7")
+        Properties props = new Properties()
+        props.setProperty('version', project.version.toString())
+        props('timestamp',buildTimestamp)
+        props.store(myfile7.newWriter(), null)
+        println myfile7.text
     }
 }
 

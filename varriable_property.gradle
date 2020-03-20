@@ -46,7 +46,8 @@ task showPropertyInfo(group:"demo"){
         //OS环境变量
         println '-------------OS环境变量-----------------'
         println System.getenv('JAVA_HOME')
-        println System.getenv('GRADLE_USER_HOME')
+        println System.env.GRADLE_USER_HOME  //System.getenv('GRADLE_USER_HOME')
+
 
         //Gradle环境变量
         println '-------------Gradle环境变量-----------------'

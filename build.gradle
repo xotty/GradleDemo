@@ -43,7 +43,7 @@ dependencies {
 //apply from: 'plugin_build.gradle'
 //apply from: 'publishing_build.gradle'
 //apply from: 'application_plugin.gradle'
-//apply from: 'misc_build.gradle'
+apply from: 'misc_build.gradle'
 //apply from: 'files_build.gradle'
 
 //apply from: 'build_logic.gradle'
@@ -53,4 +53,4 @@ allprojects {
         mavenCentral()
     }
 }
-apply from : 'misc_build.gradle'
+//apply from : 'misc_build.gradle'
