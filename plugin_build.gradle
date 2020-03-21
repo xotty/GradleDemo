@@ -1,5 +1,15 @@
+/**Gradle自定义plugin有下列4种方法：
+ * 0)脚本插件直接在脚本中任意定义，apply from引入后使用。对象插件则可以有下列3中方法定义，apply plugin引入后使用
+ * 1)直接在脚本中定义自有插件类，实现Plugin<Project>接口，在覆写的apply方法中定义插件逻辑。该插件在这个定义插件的脚本之外是不可见的
+ * 2)在buildSrc下用Groovy类来实现，仅适用本构建（任意脚本可见），其它构建不可见
+ * 3)在src/main下用Groovy类来实现的独立项目，jar包发布后可在任何地方使用，但需在buildscript中声明其位置和路径
+ * plugin id（短名称）的定义有2种主要方法：
+ * 1）src/main/resources下建立 META-INF/gradle-plugins目录，在其下编写一个名为xxx.properties的文件，内容为：
+ * implementation-class=plugin类的全限定名称（如：org.gradle.GreetingPlugin），此时文件名xxx机位plugin id
+ * 2）使用核心插件"java-gradle-plugin"来发布，在发布时直接定义plugin id（详见publishing_build.gradle）
+ */
 
-//源码在build Script中的plugin
+//1）源码在build Script中的plugin
 apply plugin:MyPlugin1
 class MyPlugin1 implements Plugin<Project> {
     @Override
@@ -10,12 +20,15 @@ class MyPlugin1 implements Plugin<Project> {
     }
 }
 
-//源码在buildSrc中的plugin
-//apply plugin: 'myplugin2'
+//2）源码在buildSrc中的plugin
+////META-INF/gradle-plugins中定义id
+apply plugin: 'myplugin2'
+//利用"java-gradle-plugin"直接为其设置id（buildSrc/build.gradle中）
 apply plugin: 'other-myplugin2'
 //apply plugin:plugins.MyPlugin2
 
-//源码在src中，然后发布到mavenLocal()的plugin
-//apply plugin: 'org.xotty.myplugin3'
-//
+//3）源码在src中，然后发布到mavenLocal()的plugin
+//META-INF/gradle-plugins中定义id
+apply plugin: 'org.xotty.myplugin3'
+//java-gradle-plugin发布时定义id
 apply plugin: 'org.xotty.other-myplugin3'

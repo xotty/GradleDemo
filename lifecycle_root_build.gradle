@@ -1,24 +1,28 @@
-println ("Build Script:rootProject")
-//plugins {
-//    id 'groovy'
-//}
-//
-//group 'org.example'
-//version '1.0-SNAPSHOT'
-//
-//repositories {
-//    maven {
-//        url 'https://maven.aliyun.com/repository/central'
-//    }
-//}
-//
-//dependencies {
-//    compile 'org.codehaus.groovy:groovy-all:2.3.11'
-//    testCompile group: 'junit', name: 'junit', version: '4.12'
-//}
+/**Gradle生命周期：初始化-->配置-->执行
+ * 1)Intialization:执行init.gradle(配置全局运行环境)和settings.gradle(配置project的层次模块结构)
+ * 2)Confgiuration:解析依赖，获取解析后得到的依赖文件，由此确定各Task的执行顺序。所有非task中的语句都在此阶段执行。
+ * 3)Excution:按依赖顺序执行task中的doFirst和doLast中的语句，若没有依赖则按字母顺序执行各Task或某一指定Task
+ * 系统提供各阶段的监听或回调，以便能在各个阶段进行准备或处理：
+ * ------init------
+ * 1)befroreSettings
+ * 2)settingsEvaluated
+ * 3)projectsLoaded
+ * ------configure------
+ * 4)beforeProject(beforeEvaluate)
+ * 5)afterProject(afterEvaluate)
+ * 6)projectsEvaluated
+ * 7)whenReady
+ * ------task excution------
+ * 8)beforeExecute
+ * 9)beforeActions
+ * 10)afterActions
+ * 11)afterExecute
+ * 12)buildFinished
+ */
+println ("rootProject config starting......")
 println "Build：rootProject：根项目配置开始:rootProject Configuration........"
-task rootProjectTask {
-    println "Build：rootProject：根项目里任务配置：rootProjectTask Configuration........"
+task showLifecycle(group:'demp_lifecycle') {
+    println "Build：rootProject：根项目任务配置：rootProjectTask Configuration in Task........"
     doFirst {
         println "Build：rootProject：执行根项目任务：rootProjectTask  is excuting doFirst......."
     }
@@ -26,7 +30,9 @@ task rootProjectTask {
         println "Build：rootProject：执行根项目任务：rootProjectTask  is excuting doLast......."
     }
 }
+
 println "Build：rootProject：根项目配置结束:rootProject Configuration........"
+
 /**自定义一个监听器*/
 class taskWhenreadyListener implements TaskExecutionGraphListener {
     @Override
@@ -36,6 +42,7 @@ class taskWhenreadyListener implements TaskExecutionGraphListener {
             println "Build：rootProject：task whenReady！ ${myTask.name} is about to Excute......,TaskExecutionGraphListener.graphPopulated"
     }
 }
+
 /**添加一个task执行图的监听器*/
 gradle.taskGraph.addTaskExecutionGraphListener(new taskWhenreadyListener())
 
@@ -109,10 +116,3 @@ class taskActionListener implements TaskActionListener{
 }
 gradle.addListener(new taskActionListener())
 
-project.beforeEvaluate { proj ->
-    println "Build：rootProject：  执行project beforeEvaluate......,current project name is--${proj.name}"
-}
-
-project.afterEvaluate { proj ->
-    println "Build：rootProject：  执行project afterEvaluate......,current project name is--${proj.name}"
-}

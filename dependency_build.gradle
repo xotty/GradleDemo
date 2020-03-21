@@ -1,3 +1,17 @@
+/**依赖管理的三个要素：配置、依赖和仓库
+ * configuration：定义依赖解析的策略（缺省为版本优先），可以据此对依赖分组，创建方法有4种
+ * denpendency：用dependencies{}块来声明具体的依赖内容，以confgiuration为分组进行。具体的依赖内容可以是
+ * 1）外部模块（需要声明其所在的仓库）
+ * 2）子项目（本项目的其它模块）
+ * 3）本地文件
+ * 4）客户端模块
+ * dependencies {
+ *        configurationName dependencyNotation1, dependencyNotation2, ...
+ * }
+ * repository：存放依赖内容的地方，gradle没有缺省仓库，使用外部模块依赖时，必须定义相应的仓库。仓库也是发布自定义plugin或自定义模块的地方
+ * 1）二进制仓库有maven和ivy两种格式
+ * 2）二进制仓库有公共仓（ mavenCentral() 、jcenter() 、google() 、gradlePluginPortal() ）、私有仓、本地仓和平面文件系统目录仓四种
+ */
 /*-------------Configuration------------------*/
 //创建方法1
 configurations.create('myConfiguration1')
@@ -57,7 +71,7 @@ dependencies {
 }
 
 /*-------------Dependency------------------*/
-//External module dependencies
+//1）External module dependencies
 dependencies {
     //for dependencies found in artifact repositories you can use
     //the group:name:version notation
@@ -83,7 +97,12 @@ dependencies {
 //    myConfiguration4 group: 'org.gradle.test.classifiers', name: 'service', version: '1.0', classifier: 'jdk14'
 }
 
-//File dependencies
+//2）Project dependencies
+dependencies {
+    myConfiguration3 project(':anotherSubProject')
+}
+
+//3）File dependencies
 dependencies {
     //declaring arbitrary files as dependencies
     implementation files('hibernate.jar', 'libs/spring.jar')
@@ -92,13 +111,7 @@ dependencies {
     implementation fileTree('libs')
 }
 
-//Project dependencies
-dependencies {
-    myConfiguration3 project(':anotherSubProject')
-}
-
-
-//Client module dependencies
+//4）Client module dependencies
 dependencies {
     runtime module("org.codehaus.groovy:groovy:2.3.3") {
         dependency("commons-cli:commons-cli:1.0") {
@@ -164,6 +177,7 @@ repositories{
         dirs 'libs'
     }
 }
+
 //ivy仓库只能是自定义的
 repositories {
     ivy {
@@ -172,6 +186,7 @@ repositories {
         //远程： url "http://repo.mycompany.com/repo"
     }
 }
+
 //自定义Maven仓库
 repositories {
     maven {
@@ -201,6 +216,7 @@ repositories {
         dirs 'lib'
     }
 }
+
 //为特定名称仓库添加相关信息
 repositories.localRepository {
     dirs 'lib'

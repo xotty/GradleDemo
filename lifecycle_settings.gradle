@@ -35,6 +35,14 @@ gradle.buildFinished {
     println "Settings：构建结束..."
 }
 
+gradle.beforeEvaluate { proj ->
+    println "Build：rootProject：执行project beforeEvaluate......,current project name is--${proj.name}"
+}
+
+gradle.afterEvaluate { proj ->
+    println "Build：rootProject：执行project afterEvaluate......,current project name is--${proj.name}"
+}
+
 TaskExecutionGraph taskGraph = gradle.getTaskGraph()
 taskGraph.whenReady {taskExcutionGraph->
     for(Task myTask in taskExcutionGraph.getAllTasks())

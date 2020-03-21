@@ -4,6 +4,7 @@ class ParentClass {
         println "Hello Method1"
     }
 }
+
 class MyClass extends ParentClass{
     static void helloWorld(){
         println "Hello World "

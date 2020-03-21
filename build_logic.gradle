@@ -1,3 +1,13 @@
+/**Gradle组织构建逻辑有下列方法：
+ * 1)直接在脚本中定义额外属性和方法，task中引用，子项目可以使用在父项目中定义的extra  properties
+ * 2)在父项目脚本中定义某个特定子项目专用的额外属性，供子项目使用
+ * 3)在buildSrc的任意自定义类都可以直接使用
+ * 4)直接在脚本中定义Groovy类，在任务中可以使用其实例（对象）
+ * 5)运行另外一个Gradle脚本中的任务
+ * 6)使用外部依赖库，需要通过buildscript定义其仓库和路径，然后import相关类，再使用
+ * 7)自定义Task(3种方法)
+ * 8)自定义Plugin(3+1种方法)
+ */
 buildscript {
     repositories {
         mavenCentral()
@@ -7,40 +17,34 @@ buildscript {
     }
 }
 
-// Define an extra property
+//1)在脚本中直接定义额外属性
 ext.srcDirName1 = 'src/main'
 
-// Define a method
+// 1)在脚本中直接定义方法并引用额外属性
  def getSrcDir(project) {
-    return project.file(srcDirName)
+    return project.file(srcDirName1)
 }
-
-
+//1)在脚本中定义义方法的另一种形式
 void myMethod(){
     println 'This is public method!'
 }
-
+//1）在task中引用上述方法
 task task1(group:'demo_buildLogic'){
     doLast{
         println 'Here is task1'
         myMethod()
-        println 'srcDir----> ' + rootProject.relativePath(getSrcDir(project))
+        println 'srcDir ----> ' + rootProject.relativePath(getSrcDir(project))
     }
 }
 
-task task2(group:'demo_buildLogic'){
-    doLast{
-        println 'Here is task2'
-        myMethod()
-    }
-}
 
-//将属性注入子项目
+//2）将属性注入子项目
 project(':subProject') {
     ext.srcDirName2 = "$srcDirName1/legacy"
 }
 
-//buildSrc下自定义任务
+
+//3）buildSrc下自定义任务通过增强任务方式调用
 task task3(type:Greetings2,group:'demo_buildLogic'){
     xName="Groovy"
     doLast{
@@ -48,7 +52,7 @@ task task3(type:Greetings2,group:'demo_buildLogic'){
     }
 }
 
-//buildSrc下的自定义类
+//3）buildSrc下的自定义类可以直接使用
 task task4(group:'demo_buildLogic'){
     doLast{
         println 'Here is task4'
@@ -59,22 +63,8 @@ task task4(group:'demo_buildLogic'){
     }
 }
 
-//运行其它Gradle脚本中的任务
-task excuteTaskInOtherGradleScript(type: GradleBuild,group:'demo_buildLogic') {
-    buildFile = 'other.gradle'
-    tasks = ['hello']
-}
 
-//外部依赖库
-import org.apache.commons.codec.binary.Base64
-task encodeBase64(group:'demo_buildLogic') {
-    doLast {
-        byte[] encodedString = new Base64().encode('hello world\n'.getBytes())
-        println new String(encodedString)
-    }
-}
-
-//使用Groovy 类和对象
+//4）定义和使用Groovy 类和对象
 class SomeGroovyClass {
     def property1 = 'ha'
     def field2 = 'ho'
@@ -102,3 +92,18 @@ task pogo(group:'demo_buildLogic'){
         println someGroovyClass.field4
         }
  }
+
+//5）运行另外一个Gradle脚本中的任务
+task excuteTaskInOtherGradleScript(type: GradleBuild,group:'demo_buildLogic') {
+    buildFile = 'other.gradle'
+    tasks = ['hello']
+}
+
+//6）使用外部依赖库，需要通过buildscript定义其仓库和路径，然后import相关类，再使用
+import org.apache.commons.codec.binary.Base64
+task encodeBase64(group:'demo_buildLogic') {
+    doLast {
+        byte[] encodedString = new Base64().encode('hello world\n'.getBytes())
+        println new String(encodedString)
+    }
+}

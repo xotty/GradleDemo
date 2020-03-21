@@ -1,4 +1,4 @@
-
+println ("anotherProject config starting......")
 dependencies {
   //  compile project(':subProject')
 }
